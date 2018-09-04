@@ -9,9 +9,17 @@ use App\Post;
 class PostsController extends Controller
 {
     //
+    public function __construct()
+    {
+        $this->middleware('auth')->except(['index', 'show']);
+    }
+
     public function index(){
 
         $posts = Post::latest()->get();
+
+        $archives = Post::selectRaw('year(created_at)year, monthname(created_at) month, count(*) published')
+            ->groupBy('year', 'month')->get()->toArray();
 
         return view('posts.index', compact('posts'));
     }
@@ -38,8 +46,9 @@ class PostsController extends Controller
 //            'body' => request('body')
 //        ]);
 
-        Post::create(request(['title', 'body']));
-
+        auth()->user()->publish(
+            new Post(request(['title', 'body']))
+        );
         return redirect('/');
     }
 }
