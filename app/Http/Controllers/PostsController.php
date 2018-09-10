@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Post;
+use Carbon\Carbon;
 
 class PostsController extends Controller
 {
@@ -16,10 +17,8 @@ class PostsController extends Controller
 
     public function index(){
 
-        $posts = Post::latest()->get();
+        $posts = Post::latest()->filter(request(['month', 'year']))->get();
 
-        $archives = Post::selectRaw('year(created_at)year, monthname(created_at) month, count(*) published')
-            ->groupBy('year', 'month')->get()->toArray();
 
         return view('posts.index', compact('posts'));
     }
